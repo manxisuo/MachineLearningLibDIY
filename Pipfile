@@ -5,9 +5,10 @@ url = "http://mirrors.aliyun.com/pypi/simple"
 verify_ssl = true
 
 [dev-packages]
-matplotlib = "*"
 
 [packages]
+numpy = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.8"

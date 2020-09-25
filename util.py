@@ -1,24 +1,17 @@
 from typing import List, Tuple
+import numpy as np
+from numpy import ndarray
 
 
-def _normalize(array: List[float]) -> Tuple[float, float]:
+def _normalize(array: ndarray) -> Tuple[float, float]:
     """
     归一化一个数字列表，返回归一化参数。
     """
-    _min, _max, s, size = array[0], array[0], 0, len(array)
-    for i in array:
-        if i < _min:
-            _min = i
-        elif i > _max:
-            _max = i
-        s += i
-
-    avg, rng = s / size, _max - _min
-
+    rng = array.max() - array.min()
     if rng == 0:
-        return array[0] - 1, 1
+        return np.array([array[0] - 1, 1])
     else:
-        return avg, rng
+        return np.array([array.sum() / array.size, rng])
 
 
 class Normalizer:
@@ -28,35 +21,39 @@ class Normalizer:
     def __init__(self):
         self.params: List[Tuple[float, float]] = None
 
-    def fit(self, xs: List[List[float]]):
-        """训练归一化器。"""
-        n = len(xs[0])
-        self.params = [None] * n
+    def fit(self, X: ndarray) -> None:
+        """
+        训练归一化器。
+        :param X: 任意行n列矩阵
+        """
+        self.params = np.apply_along_axis(_normalize, 0, X)
 
-        for i in range(n):
-            self.params[i] = _normalize([x[i] for x in xs])
-
-    def transform(self, xs: List[List[float]]):
-        """使用归一化器进行归一化。"""
-        n = len(xs[0])
-        normalize_xs = []
-        for x in xs:
-            normalize_x = []
-            for i in range(n):
-                avg, rng = self.params[i]
-                normalize_x.append((x[i] - avg) / rng)
-            normalize_xs.append(normalize_x)
-        return normalize_xs
+    def transform(self, X: ndarray) -> ndarray:
+        """
+        使用归一化器进行归一化。
+        :param X: 任意行n行矩阵或n维向量
+        """
+        return (X - self.params[0]) / self.params[1]
 
 
 if __name__ == '__main__':
-    xs = [
-        [3, 3, 0, 0],
-        [1, 3, 0, 1],
-        [4, 3, 0, 0],
-        [9, 3, 0, 1]
-    ]
+    X = np.array([
+         [3, 3, 0, 0],
+         [1, 3, 0, 1],
+         [4, 3, 0, 0],
+         [9, 3, 0, 1]])
+
+    # TODO 如果转换数据的值超出了训练集中数据的范围，结果有误
+    # TODO 即目前仅能保证对训练集中的数据的转换有效
+    X2 = np.array([
+        [2, 3, 0, 1]
+    ])
+
+    X3 = np.array([2, 3, 0, 1])
 
     normalizer = Normalizer()
-    normalizer.fit(xs)
-    print(normalizer.transform(xs))
+    normalizer.fit(X)
+
+    print(normalizer.transform(X))
+    print(normalizer.transform(X2))
+    print(normalizer.transform(X3))

@@ -3,6 +3,7 @@ from typing import Tuple
 from time import time
 import numpy as np
 from numpy import ndarray
+from tool import CachedFunc
 
 
 class History:
@@ -20,31 +21,30 @@ def bgd(X: ndarray, y: ndarray, _loss, _gradient_of_loss,
     theta = np.zeros(X.shape[1])  # 模型参数初始化
     loss_list = []  # 每次迭代后的损失的列表
     k = 0  # 迭代次数
-    previous_loss = _loss(theta, X, y)  # 前一次的损失函数值
-    satisfied = False
+    previous_loss = _loss(theta, X, y)  # 前一次的损失
 
-    while not satisfied:
+    fun_loss = CachedFunc(_loss)  # 为了减少loss的计算次数
+
+    while True:
         theta = theta - _gradient_of_loss(theta, X, y) * alpha
 
         # 检查迭代次数条件是否满足
         k += 1
         if num_iteration and 0 < num_iteration < k:
-            satisfied = True
-
-        # 此处是为了减少loss的计算次数
-        if (epsilon and 0 < epsilon) or show_process or save_history:
-            loss = _loss(theta, X, y)
+            break
 
         # 检查损失下降条件是否满足
         if epsilon and 0 < epsilon:
-            if abs(loss - previous_loss) <= epsilon:
-                satisfied = True
-            previous_loss = loss
+            if abs(fun_loss(theta, X, y) - previous_loss) <= epsilon:
+                break
+            previous_loss = fun_loss(theta, X, y)
 
         if show_process:
-            print(f'epoch: {k}, loss: {loss}, theta: {theta}')
+            print(f'epoch: {k}, loss: {fun_loss(theta, X, y)}, theta: {theta}')
 
         if save_history:
-            loss_list.append(loss)
+            loss_list.append(fun_loss(theta, X, y))
+
+        fun_loss.reset()
 
     return theta, History(loss_list, time() - start)

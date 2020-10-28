@@ -23,7 +23,7 @@ def bgd(X: ndarray, y: ndarray, _loss, _gradient_of_loss,
     k = 0  # 迭代次数
     previous_loss = _loss(theta, X, y)  # 前一次的损失
 
-    fun_loss = CachedFunc(_loss)  # 为了减少loss的计算次数
+    func_loss = CachedFunc(_loss)  # 为了减少loss的计算次数
 
     while True:
         theta = theta - _gradient_of_loss(theta, X, y) * alpha
@@ -35,16 +35,16 @@ def bgd(X: ndarray, y: ndarray, _loss, _gradient_of_loss,
 
         # 检查损失下降条件是否满足
         if epsilon and 0 < epsilon:
-            if abs(fun_loss(theta, X, y) - previous_loss) <= epsilon:
+            if abs(func_loss(theta, X, y) - previous_loss) <= epsilon:
                 break
-            previous_loss = fun_loss(theta, X, y)
+            previous_loss = func_loss(theta, X, y)
 
         if show_process:
-            print(f'epoch: {k}, loss: {fun_loss(theta, X, y)}, theta: {theta}')
+            print(f'epoch: {k}, loss: {func_loss(theta, X, y)}, theta: {theta}')
 
         if save_history:
-            loss_list.append(fun_loss(theta, X, y))
+            loss_list.append(func_loss(theta, X, y))
 
-        fun_loss.reset()
+        func_loss.reset()
 
     return theta, History(loss_list, time() - start)

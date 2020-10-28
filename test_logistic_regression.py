@@ -33,7 +33,7 @@ if __name__ == '__main__':
     # 训练模型
     model = LogisticRegressionModel()
     history = model.fit(X_training, y_training,
-                        alpha=0.03, num_iteration=5000, epsilon=None,
+                        alpha=0.03, num_iteration=50000, epsilon=None,
                         show_process=False, save_history=True)
 
     # 训练结果

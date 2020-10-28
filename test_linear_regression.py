@@ -45,4 +45,5 @@ if __name__ == '__main__':
     plt.show()
 
     # 评估模型
-    print('测试集损失:', model.evaluate(X_test, y_test))
+    loss = model.evaluate(X_test, y_test)
+    print('测试集损失:', loss)
